@@ -1,5 +1,8 @@
 package com.example.Aadhaar_Service.Entity;
 
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -15,7 +18,19 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class User extends BaseModel {
 
+    @Column(nullable = false)
     private String userName;
 
-    
+    @Column(nullable = false,unique = true)
+    private Long addhaarNumber;
+
+    @Column(nullable = false, unique = true)
+    private Long phoneNumber;
+
+    @Column(nullable=false)
+    private String dateOfBirth;
+
+    @Column(nullable=false)
+    private String address;
+
 }
