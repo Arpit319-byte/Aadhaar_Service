@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.Aadhaar_Service.Entity.User;
 import com.example.Aadhaar_Service.Service.UserService;
 
+import jakarta.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
 
 @RestController
@@ -56,7 +58,7 @@ public class UserController {
 
     // Get user by Aadhaar number
     @GetMapping("/aadhaar/{aadhaarNumber}")
-    public ResponseEntity<User> getUserByAadhaarNumber(@PathVariable Long aadhaarNumber){
+    public ResponseEntity<User> getUserByAadhaarNumber(@PathVariable String aadhaarNumber){
         log.info("Finding user by Aadhaar number: " + aadhaarNumber);
         User user = userService.getByAadhaarNumber(aadhaarNumber);
 
@@ -71,7 +73,7 @@ public class UserController {
 
     // Get user by phone number
     @GetMapping("/phone/{phoneNumber}")
-    public ResponseEntity<User> getUserByPhoneNumber(@PathVariable Long phoneNumber){
+    public ResponseEntity<User> getUserByPhoneNumber(@PathVariable String phoneNumber){
         log.info("Finding user by phone number: " + phoneNumber);
         User user = userService.getByPhoneNumber(phoneNumber);
 
@@ -102,7 +104,7 @@ public class UserController {
 
     // Check if Aadhaar exists
     @GetMapping("/check-aadhaar")
-    public ResponseEntity<Boolean> checkAadhaarExists(@RequestParam Long aadhaarNumber){
+    public ResponseEntity<Boolean> checkAadhaarExists(@RequestParam String aadhaarNumber){
         log.info("Checking if Aadhaar exists: " + aadhaarNumber);
         boolean exists = userService.isAadhaarTaken(aadhaarNumber);
         return ResponseEntity.ok(exists);
@@ -110,23 +112,19 @@ public class UserController {
 
     // Check if phone exists
     @GetMapping("/check-phone")
-    public ResponseEntity<Boolean> checkPhoneExists(@RequestParam Long phoneNumber){
+    public ResponseEntity<Boolean> checkPhoneExists(@RequestParam String phoneNumber){
         log.info("Checking if phone exists: " + phoneNumber);
         boolean exists = userService.isPhoneTaken(phoneNumber);
         return ResponseEntity.ok(exists);
     }
 
-    
-
-
-
     // Create new user
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user){
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user){
         log.info("Creating new user");
-        userService.createUser(user);
-        log.info("User created successfully: " + user.toString());
-        return ResponseEntity.ok(user);
+        User createdUser = userService.createUser(user);
+        log.info("User created successfully: " + createdUser.toString());
+        return ResponseEntity.ok(createdUser);
     }
 
     
@@ -177,10 +175,4 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
-    
-
-
-   
-
-    
 }

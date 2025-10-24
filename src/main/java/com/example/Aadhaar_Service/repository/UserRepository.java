@@ -5,11 +5,14 @@ import com.example.Aadhaar_Service.Entity.User;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User,Long> {
-    User findByAddhaarNumber(Long addhaarNumber);
-    boolean existsByAddhaarNumber(Long addhaarNumber);
+    User findByAddhaarNumber(String addhaarNumber);
+    boolean existsByAddhaarNumber(String addhaarNumber);
 
-    User findByPhoneNumber(Long phoneNumber);
-    boolean existsByPhoneNumber(Long phoneNumber);
+    User findByPhoneNumber(String phoneNumber);
+    boolean existsByPhoneNumber(String phoneNumber);
+
+    User findByEmail(String email);
+    boolean existsByEmail(String email);
 
     List<User> findByUserNameContainingIgnoreCase(String namePart);
     List<User> findAllByOrderByUserNameAsc();

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import com.example.Aadhaar_Service.Entity.User;
 import com.example.Aadhaar_Service.repository.UserRepository;
 
+import jakarta.validation.Valid;
+
 import lombok.extern.slf4j.Slf4j;
 
 @Service
@@ -14,17 +16,29 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
 
 
-    UserRepository userRepository;
+    private final UserRepository userRepository;
 
-    public UserService(UserRepository _UserRepository){
-        log.info("Initializing the UserService object in the constructor");
-        this.userRepository=_UserRepository;
+    public UserService(UserRepository userRepository){
+        this.userRepository = userRepository;
+        log.info("UserService initialized with constructor-based dependency injection");
     }
 
 
-    public void createUser(User user){
+    public User createUser(@Valid User user){
         log.info("Creating the User in the database");
-        userRepository.save(user);
+        
+        // Check for duplicates (business logic validation)
+        if (isAadhaarTaken(user.getAddhaarNumber())) {
+            throw new IllegalArgumentException("Aadhaar number already exists");
+        }
+        if (isPhoneTaken(user.getPhoneNumber())) {
+            throw new IllegalArgumentException("Phone number already exists");
+        }
+        if (isEmailTaken(user.getEmail())) {
+            throw new IllegalArgumentException("Email already exists");
+        }
+        
+        return userRepository.save(user);
     }
 
 
@@ -68,7 +82,11 @@ public class UserService {
 
 
     public User getUser(Long id){
-        log.info("Finding  the user by the given id->"+id);
+        log.info("Finding the user by the given id: " + id);
+        if (id == null || id <= 0) {
+            log.warn("Invalid user ID provided: " + id);
+            return null;
+        }
         return userRepository.findById(id).orElse(null);
     }
 
@@ -78,29 +96,50 @@ public class UserService {
     }
 
 
-    public User getByAadhaarNumber(Long aadhaarNumber){
+    public User getByAadhaarNumber(String aadhaarNumber){
         log.info("Finding user by Aadhaar number: " + aadhaarNumber);
         return userRepository.findByAddhaarNumber(aadhaarNumber);
     }
 
-    public User getByPhoneNumber(Long phoneNumber){
+    public User getByPhoneNumber(String phoneNumber){
         log.info("Finding user by phone number: " + phoneNumber);
         return userRepository.findByPhoneNumber(phoneNumber);
     }
 
     public List<User> searchByUserName(String namePart){
         log.info("Searching users by name: " + namePart);
-        return userRepository.findByUserNameContainingIgnoreCase(namePart);
+        if (namePart == null || namePart.trim().isEmpty()) {
+            log.warn("Empty search term provided");
+            return List.of(); // Return empty list for empty search
+        }
+        return userRepository.findByUserNameContainingIgnoreCase(namePart.trim());
     }
 
-    public boolean isAadhaarTaken(Long aadhaarNumber){
+    public boolean isAadhaarTaken(String aadhaarNumber){
         log.info("Checking if Aadhaar is taken: " + aadhaarNumber);
+        if (aadhaarNumber == null || aadhaarNumber.trim().isEmpty()) {
+            log.warn("Null or empty Aadhaar number provided");
+            return false;
+        }
         return userRepository.existsByAddhaarNumber(aadhaarNumber);
     }
 
-    public boolean isPhoneTaken(Long phoneNumber){
+    public boolean isPhoneTaken(String phoneNumber){
         log.info("Checking if phone is taken: " + phoneNumber);
+        if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
+            log.warn("Null or empty phone number provided");
+            return false;
+        }
         return userRepository.existsByPhoneNumber(phoneNumber);
+    }
+
+    public boolean isEmailTaken(String email){
+        log.info("Checking if email is taken: " + email);
+        if (email == null || email.trim().isEmpty()) {
+            log.warn("Null or empty email provided");
+            return false;
+        }
+        return userRepository.existsByEmail(email);
     }
 
     public boolean deleteById(Long id){
@@ -117,9 +156,5 @@ public class UserService {
         log.info("Getting all users sorted by name");
         return userRepository.findAllByOrderByUserNameAsc();
     }
-    public User getByAadhaarNumber(Long aadhaarNumber){
-        
-    }
-
     
 }
