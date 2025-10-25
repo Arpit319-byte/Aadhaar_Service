@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 
 import com.example.Aadhaar_Service.Entity.User;
 import com.example.Aadhaar_Service.repository.UserRepository;
+import com.example.Aadhaar_Service.dto.UserRequestDTO;
+import com.example.Aadhaar_Service.dto.UserResponseDTO;
+import com.example.Aadhaar_Service.util.UserMapper;
 
 import jakarta.validation.Valid;
 
@@ -24,8 +27,11 @@ public class UserService {
     }
 
 
-    public User createUser(@Valid User user){
+    public UserResponseDTO createUser(@Valid UserRequestDTO userRequestDTO){
         log.info("Creating the User in the database");
+        
+        // Convert DTO to Entity
+        User user = UserMapper.toEntity(userRequestDTO);
         
         // Check for duplicates (business logic validation)
         if (isAadhaarTaken(user.getAddhaarNumber())) {
@@ -38,28 +44,20 @@ public class UserService {
             throw new IllegalArgumentException("Email already exists");
         }
         
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        return UserMapper.toResponseDTO(savedUser);
     }
 
 
-    public User updateUser(User incoming, Long id){
+    public UserResponseDTO updateUser(UserRequestDTO userRequestDTO, Long id){
         log.info("Updating user with id: " + id);
         
         return userRepository.findById(id).map(existing -> {
-            // Update only provided fields - safe partial updates
-            if (incoming.getUserName() != null && !incoming.getUserName().trim().isEmpty()) {
-                existing.setUserName(incoming.getUserName());
-                log.info("Updated user name for id: " + id);
-            }
-            
-            if (incoming.getPhoneNumber() != null) {
-                existing.setPhoneNumber(incoming.getPhoneNumber());
-                log.info("Updated phone number for id: " + id);
-            }
-            
-            // Aadhaar number is immutable - never update it
+            // Update only provided fields - safe partial updates using utility method
+            User updatedUser = UserMapper.updateEntity(existing, userRequestDTO);
             log.info("User updated successfully for id: " + id);
-            return userRepository.save(existing);
+            User savedUser = userRepository.save(updatedUser);
+            return UserMapper.toResponseDTO(savedUser);
             
         }).orElseThrow(() -> {
             log.warn("User with id " + id + " not found, cannot update");
@@ -81,38 +79,47 @@ public class UserService {
     }
 
 
-    public User getUser(Long id){
+    public UserResponseDTO getUser(Long id){
         log.info("Finding the user by the given id: " + id);
         if (id == null || id <= 0) {
             log.warn("Invalid user ID provided: " + id);
             return null;
         }
-        return userRepository.findById(id).orElse(null);
+        User user = userRepository.findById(id).orElse(null);
+        return UserMapper.toResponseDTO(user);
     }
 
-    public List<User> getAllUsers(){
+    public List<UserResponseDTO> getAllUsers(){
         log.info("Getting all the user from the database");
-        return userRepository.findAll();
+        List<User> users = userRepository.findAll();
+        return users.stream()
+                .map(UserMapper::toResponseDTO)
+                .toList();
     }
 
 
-    public User getByAadhaarNumber(String aadhaarNumber){
+    public UserResponseDTO getByAadhaarNumber(String aadhaarNumber){
         log.info("Finding user by Aadhaar number: " + aadhaarNumber);
-        return userRepository.findByAddhaarNumber(aadhaarNumber);
+        User user = userRepository.findByAddhaarNumber(aadhaarNumber);
+        return UserMapper.toResponseDTO(user);
     }
 
-    public User getByPhoneNumber(String phoneNumber){
+    public UserResponseDTO getByPhoneNumber(String phoneNumber){
         log.info("Finding user by phone number: " + phoneNumber);
-        return userRepository.findByPhoneNumber(phoneNumber);
+        User user = userRepository.findByPhoneNumber(phoneNumber);
+        return UserMapper.toResponseDTO(user);
     }
 
-    public List<User> searchByUserName(String namePart){
+    public List<UserResponseDTO> searchByUserName(String namePart){
         log.info("Searching users by name: " + namePart);
         if (namePart == null || namePart.trim().isEmpty()) {
             log.warn("Empty search term provided");
             return List.of(); // Return empty list for empty search
         }
-        return userRepository.findByUserNameContainingIgnoreCase(namePart.trim());
+        List<User> users = userRepository.findByUserNameContainingIgnoreCase(namePart.trim());
+        return users.stream()
+                .map(UserMapper::toResponseDTO)
+                .toList();
     }
 
     public boolean isAadhaarTaken(String aadhaarNumber){
@@ -152,9 +159,12 @@ public class UserService {
         return true;
     }
 
-    public List<User> getAllUsersSortedByName(){
+    public List<UserResponseDTO> getAllUsersSortedByName(){
         log.info("Getting all users sorted by name");
-        return userRepository.findAllByOrderByUserNameAsc();
+        List<User> users = userRepository.findAllByOrderByUserNameAsc();
+        return users.stream()
+                .map(UserMapper::toResponseDTO)
+                .toList();
     }
     
 }

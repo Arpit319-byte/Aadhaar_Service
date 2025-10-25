@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Aadhaar_Service.Entity.User;
 import com.example.Aadhaar_Service.Service.UserService;
+import com.example.Aadhaar_Service.dto.UserRequestDTO;
+import com.example.Aadhaar_Service.dto.UserResponseDTO;
 
 import jakarta.validation.Valid;
 
@@ -34,9 +36,9 @@ public class UserController {
 
     // Get user by ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id){
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id){
         log.info("Get user by the userId: " + id);
-        User user = userService.getUser(id);
+        UserResponseDTO user = userService.getUser(id);
 
         if(user != null){
             log.info("User found with userId: " + id);
@@ -49,18 +51,18 @@ public class UserController {
 
     // Get all users
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers(){
+    public ResponseEntity<List<UserResponseDTO>> getAllUsers(){
         log.info("Fetching all users");
-        List<User> users = userService.getAllUsers();
+        List<UserResponseDTO> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
 
     // Get user by Aadhaar number
     @GetMapping("/aadhaar/{aadhaarNumber}")
-    public ResponseEntity<User> getUserByAadhaarNumber(@PathVariable String aadhaarNumber){
+    public ResponseEntity<UserResponseDTO> getUserByAadhaarNumber(@PathVariable String aadhaarNumber){
         log.info("Finding user by Aadhaar number: " + aadhaarNumber);
-        User user = userService.getByAadhaarNumber(aadhaarNumber);
+        UserResponseDTO user = userService.getByAadhaarNumber(aadhaarNumber);
 
         if(user != null){
             log.info("User found with Aadhaar number: " + aadhaarNumber);
@@ -73,9 +75,9 @@ public class UserController {
 
     // Get user by phone number
     @GetMapping("/phone/{phoneNumber}")
-    public ResponseEntity<User> getUserByPhoneNumber(@PathVariable String phoneNumber){
+    public ResponseEntity<UserResponseDTO> getUserByPhoneNumber(@PathVariable String phoneNumber){
         log.info("Finding user by phone number: " + phoneNumber);
-        User user = userService.getByPhoneNumber(phoneNumber);
+        UserResponseDTO user = userService.getByPhoneNumber(phoneNumber);
 
         if(user != null){
             log.info("User found with phone number: " + phoneNumber);
@@ -88,17 +90,17 @@ public class UserController {
 
     // Search users by name
     @GetMapping("/search")
-    public ResponseEntity<List<User>> searchUsersByName(@RequestParam String name){
+    public ResponseEntity<List<UserResponseDTO>> searchUsersByName(@RequestParam String name){
         log.info("Searching users by name: " + name);
-        List<User> users = userService.searchByUserName(name);
+        List<UserResponseDTO> users = userService.searchByUserName(name);
         return ResponseEntity.ok(users);
     }
 
     // Get all users sorted by name
     @GetMapping("/sorted")
-    public ResponseEntity<List<User>> getAllUsersSorted(){
+    public ResponseEntity<List<UserResponseDTO>> getAllUsersSorted(){
         log.info("Getting all users sorted by name");
-        List<User> users = userService.getAllUsersSortedByName();
+        List<UserResponseDTO> users = userService.getAllUsersSortedByName();
         return ResponseEntity.ok(users);
     }
 
@@ -120,9 +122,9 @@ public class UserController {
 
     // Create new user
     @PostMapping
-    public ResponseEntity<User> createUser(@Valid @RequestBody User user){
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO userRequestDTO){
         log.info("Creating new user");
-        User createdUser = userService.createUser(user);
+        UserResponseDTO createdUser = userService.createUser(userRequestDTO);
         log.info("User created successfully: " + createdUser.toString());
         return ResponseEntity.ok(createdUser);
     }
@@ -130,9 +132,9 @@ public class UserController {
     
     // Update user by ID
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUserById(@PathVariable Long id, @RequestBody User user){
+    public ResponseEntity<UserResponseDTO> updateUserById(@PathVariable Long id, @Valid @RequestBody UserRequestDTO userRequestDTO){
         log.info("Updating user with ID: " + id);
-        User updatedUser = userService.updateUser(user, id);
+        UserResponseDTO updatedUser = userService.updateUser(userRequestDTO, id);
 
         if(updatedUser != null){
             log.info("User updated successfully with ID: " + id);
