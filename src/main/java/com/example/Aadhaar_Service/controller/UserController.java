@@ -159,7 +159,7 @@ public class UserController {
 
     // Delete user by Aadhaar number
     @DeleteMapping("/aadhaar/{aadhaarNumber}")
-    public ResponseEntity<Void> deleteUserByAadhaar(@PathVariable Long aadhaarNumber){
+    public ResponseEntity<Void> deleteUserByAadhaar(@PathVariable String aadhaarNumber){
         log.info("Deleting user with Aadhaar number: " + aadhaarNumber);
         User user = userService.getByAadhaarNumber(aadhaarNumber);
         

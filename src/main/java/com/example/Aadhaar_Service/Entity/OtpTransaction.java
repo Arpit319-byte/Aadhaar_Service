@@ -2,6 +2,7 @@ package com.example.Aadhaar_Service.Entity;
 
 import java.time.LocalDateTime;
 
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
@@ -16,7 +17,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper=true)
-public class OtpTransacton extends BaseModel {
+public class OtpTransaction extends BaseModel {
 
 
     @Column(nullable=false,unique=true)
@@ -25,10 +26,13 @@ public class OtpTransacton extends BaseModel {
     @Column(nullable=false)
     private Long aadhaarNumber;
 
+    @Column(nullable = false)
     private String opt;
 
+    @Column(nullable = false)
     private Boolean isVerfied;
 
+    @Column(nullable = false)
     private LocalDateTime expireAt;
     
 }
